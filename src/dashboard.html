@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador Visual de Previsão de Entrega e Risco de Atraso — Portfólio AI Engineer</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    input[type="range"] { accent-color: #ea1d2c; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <!-- Top Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
+          AI
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold text-slate-900">Previsão de Tempo de Entrega &amp; Risco de Atraso</h1>
+            <span class="hidden sm:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
+              Portfólio GEN IA
+            </span>
+          </div>
+          <p class="text-xs text-slate-500">Regressão Ridge com contribuições em minutos</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="engineBadge" role="status" class="text-xs font-medium px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+          Carregando previsão…
+        </span>
+        <button id="btnToggleJson" type="button" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 transition">
+          Ver JSON da API
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <!-- Barra de Cenários Prontos -->
+    <section class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Cenários Rápidos para Teste</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Escolha um cenário ou ajuste os dados do pedido.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="btnScenarioLow" type="button" class="text-xs font-semibold px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition">
+            Lanche fora de pico
+          </button>
+          <button id="btnScenarioMed" type="button" class="text-xs font-semibold px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition">
+            Almoço movimentado
+          </button>
+          <button id="btnScenarioHigh" type="button" class="text-xs font-semibold px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 transition">
+            Sábado à noite com fila
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid Principal: Esquerda (Inputs) | Direita (Retorno Visual) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- Coluna Esquerda: Dados de Entrada do Pedido -->
+      <section class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h2 class="text-sm font-bold text-slate-900">Dados de Entrada do Pedido</h2>
+            <p class="text-xs text-slate-500">Valores de exemplo no momento da compra</p>
+          </div>
+          <button id="btnRecalculate" type="button" class="text-xs font-bold px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-sm transition">
+            Atualizar Previsão
+          </button>
+        </div>
+
+        <!-- Restaurante e Horário -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="inpCategory" class="block text-xs font-semibold text-slate-700 mb-1">Categoria do Restaurante</label>
+            <select id="inpCategory" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="pizza">🍕 Pizza</option>
+              <option value="italian">🍝 Italiana (Massas)</option>
+              <option value="japanese">🍣 Japonesa / Sushi</option>
+              <option value="thai">🍜 Tailandesa</option>
+              <option value="chinese">🥡 Chinesa</option>
+              <option value="american">🍔 Americana / Burger</option>
+              <option value="mexican">🌮 Mexicana</option>
+              <option value="sandwiches">🥪 Sanduíches</option>
+              <option value="fast">⚡ Fast Food</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="inpMarket" class="block text-xs font-semibold text-slate-700 mb-1">Região / Praça (Market ID)</label>
+            <select id="inpMarket" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="1">Praça 1</option>
+              <option value="2" selected>Praça 2</option>
+              <option value="3">Praça 3</option>
+              <option value="4">Praça 4</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="inpHour" class="block text-xs font-semibold text-slate-700 mb-1">
+              Horário do Pedido (Local): <span id="lblHour" class="font-bold text-red-600">19h</span>
+            </label>
+            <input id="inpHour" type="range" min="0" max="23" value="19" class="w-full" />
+          </div>
+
+          <div>
+            <label for="inpWeekend" class="block text-xs font-semibold text-slate-700 mb-1">Dia da Semana</label>
+            <select id="inpWeekend" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="0">Dia Útil (Seg–Sex)</option>
+              <option value="1" selected>Fim de Semana (Sáb–Dom)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Pressão de Oferta e Demanda de Entregadores -->
+        <div class="pt-3 border-t border-slate-100 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Oferta vs. Demanda na Região (Raio 10 mi)</h3>
+            <span id="lblOccupancyBadge" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+              Ocupação: 95%
+            </span>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <label for="inpOnshift" class="font-medium text-slate-700">Entregadores Ativos no Turno (`total_onshift_dashers`)</label>
+              <span id="lblOnshift" class="font-bold text-slate-900">20</span>
+            </div>
+            <input id="inpOnshift" type="range" min="1" max="80" value="20" class="w-full" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <label for="inpBusy" class="font-medium text-slate-700">Entregadores Ocupados Agora (`total_busy_dashers`)</label>
+              <span id="lblBusy" class="font-bold text-slate-900">19</span>
+            </div>
+            <input id="inpBusy" type="range" min="0" max="80" value="19" class="w-full" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <label for="inpOutstanding" class="font-medium text-slate-700">Total de Pedidos em Andamento (`total_outstanding_orders`)</label>
+              <span id="lblOutstanding" class="font-bold text-slate-900">34</span>
+            </div>
+            <input id="inpOutstanding" type="range" min="0" max="100" value="34" class="w-full" />
+          </div>
+        </div>
+
+        <!-- Complexidade do Pedido e Estimativa de Trânsito -->
+        <div class="pt-3 border-t border-slate-100 space-y-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Tamanho do Pedido &amp; Rota</h3>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <label for="inpItems" class="font-medium text-slate-700">Total de Itens</label>
+                <span id="lblItems" class="font-bold text-slate-900">4</span>
+              </div>
+              <input id="inpItems" type="range" min="1" max="15" value="4" class="w-full" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <label for="inpSubtotal" class="font-medium text-slate-700">Valor Subtotal</label>
+                <span id="lblSubtotal" class="font-bold text-slate-900">US$ 38,50</span>
+              </div>
+              <input id="inpSubtotal" type="range" min="800" max="15000" step="150" value="3850" class="w-full" />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <label for="inpDrivingMin" class="font-medium text-slate-700">Tempo Estimado de Trânsito Loja → Cliente</label>
+              <span id="lblDrivingMin" class="font-bold text-slate-900">13,0 min (780 s)</span>
+            </div>
+            <input id="inpDrivingMin" type="range" min="3" max="35" step="0.5" value="13" class="w-full" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <label for="inpPlaceMin" class="font-medium text-slate-700">Tempo de Transmissão do Pedido ao Restaurante</label>
+              <span id="lblPlaceMin" class="font-bold text-slate-900">4,2 min (250 s)</span>
+            </div>
+            <input id="inpPlaceMin" type="range" min="1.5" max="10" step="0.5" value="4.2" class="w-full" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Coluna Direita: Painel Visual das Estimativas e Explicabilidade -->
+      <section id="predictionResults" class="hidden lg:col-span-7 space-y-5">
+        <!-- Banner Principal de Status de Risco -->
+        <div id="riskBanner" class="rounded-2xl p-5 border shadow-sm transition-all bg-amber-50 border-amber-200">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span id="riskBadgePill" class="text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-200 text-amber-900">
+                  Risco de Atraso
+                </span>
+                <span id="lblSlaNote" class="text-xs text-slate-600 font-medium">
+                  Comparado ao ETA operacional de referência
+                </span>
+              </div>
+              <h2 id="riskHeadline" class="text-lg sm:text-xl font-extrabold text-slate-900">
+                Analisando pedido...
+              </h2>
+            </div>
+
+            <div class="text-right">
+              <div class="text-xs font-semibold uppercase text-slate-500">Chance de ultrapassar o prazo</div>
+              <div id="kpiRiskPct" class="text-3xl sm:text-4xl font-black text-slate-900">0,0%</div>
+            </div>
+          </div>
+
+          <!-- Barra de Progresso do Risco -->
+          <div class="mt-4">
+            <div class="w-full h-3 bg-white/80 rounded-full overflow-hidden border border-slate-200/80">
+              <div id="riskProgressBar" class="h-full transition-all duration-300 rounded-full bg-amber-500" style="width: 50%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] font-medium text-slate-500 mt-1">
+              <span>0% (No Prazo Seguro)</span>
+              <span>Limiar de Alerta Operacional (50%)</span>
+              <span>100% (Atraso Crítico)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Cards de Métricas de Tempo -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div class="text-xs font-semibold text-slate-500">Tempo Real Estimado (IA)</div>
+            <div class="mt-1 flex items-baseline gap-1.5">
+              <span id="kpiPredictedMin" class="text-2xl sm:text-3xl font-extrabold text-slate-900">--</span>
+              <span class="text-xs font-semibold text-slate-500">minutos</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">Previsão do modelo Ridge ETA</p>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div class="text-xs font-semibold text-slate-500">Prazo de referência</div>
+            <div class="mt-1 flex items-baseline gap-1.5">
+              <span id="kpiReferenceMin" class="text-2xl sm:text-3xl font-extrabold text-slate-700">--</span>
+              <span class="text-xs font-semibold text-slate-500">minutos</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">Transmissão + trajeto + tempo adicional + margem de 5 min</p>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div class="text-xs font-semibold text-slate-500">Diferença para o prazo</div>
+            <div class="mt-1 flex items-baseline gap-1.5">
+              <span id="kpiExcessMin" class="text-2xl sm:text-3xl font-extrabold text-slate-900">--</span>
+              <span class="text-xs font-semibold text-slate-500">minutos</span>
+            </div>
+            <p id="kpiExcessSub" class="text-[11px] text-slate-400 mt-1">Folga ou estouro previsto</p>
+          </div>
+        </div>
+
+        <!-- Gráfico Visual dos Fatores que Mais Influenciaram a Previsão -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Principais contribuições do modelo</h3>
+              <p class="text-xs text-slate-500">
+                Minutos somados ou subtraídos da base linear do modelo (<span id="lblBaseIntercept" class="font-semibold">—</span>).
+              </p>
+            </div>
+          </div>
+
+          <div id="factorsContainer" class="space-y-3"></div>
+        </div>
+
+        <!-- Explicação em Linguagem Natural Ancorada nos Dados -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Explicação da previsão</h3>
+            <span id="lblExplanationMode" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+              deterministic_fallback
+            </span>
+          </div>
+          <p id="txtExplanation" class="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200/80"></p>
+        </div>
+
+        <!-- Bloco Opcional: JSON Bruto da API (Oculto por padrão) -->
+        <div id="jsonPanel" class="hidden bg-slate-900 text-slate-100 rounded-2xl p-4 border border-slate-800 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-300">Resposta JSON (`POST /predict`)</span>
+            <button id="btnCopyJson" type="button" class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+              Copiar JSON
+            </button>
+          </div>
+          <pre id="jsonPre" class="text-xs text-emerald-300 overflow-x-auto leading-relaxed"></pre>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    let currentRequest;
+
+    function readFormPayload() {
+      const category = document.getElementById("inpCategory").value;
+      const marketId = parseInt(document.getElementById("inpMarket").value, 10);
+      const hour = parseInt(document.getElementById("inpHour").value, 10);
+      const isWeekend = parseInt(document.getElementById("inpWeekend").value, 10) === 1;
+      const onshift = parseFloat(document.getElementById("inpOnshift").value);
+      const busy = parseFloat(document.getElementById("inpBusy").value);
+      const outstanding = parseFloat(document.getElementById("inpOutstanding").value);
+      const totalItems = parseInt(document.getElementById("inpItems").value, 10);
+      const subtotalCents = parseFloat(document.getElementById("inpSubtotal").value);
+      const drivingMin = parseFloat(document.getElementById("inpDrivingMin").value);
+      const placeMin = parseFloat(document.getElementById("inpPlaceMin").value);
+
+      const numDistinct = Math.max(1, Math.min(totalItems, Math.ceil(totalItems * 0.75)));
+      const avgCents = subtotalCents / totalItems;
+      const minPrice = Math.round(avgCents * 0.65);
+      const maxPrice = Math.round(avgCents * 1.35);
+
+      const day = isWeekend ? "2015-02-07" : "2015-02-06";
+      const localHour = String(hour).padStart(2, "0");
+      const createdAt = `${day}T${localHour}:30:00-08:00`;
+
+      return {
+        market_id: marketId,
+        created_at: createdAt,
+        store_id: 145,
+        store_primary_category: category,
+        order_protocol: 1,
+        total_items: totalItems,
+        subtotal: subtotalCents,
+        num_distinct_items: numDistinct,
+        min_item_price: minPrice,
+        max_item_price: maxPrice,
+        total_onshift_dashers: onshift,
+        total_busy_dashers: busy,
+        total_outstanding_orders: outstanding,
+        estimated_order_place_duration: Math.round(placeMin * 60),
+        estimated_store_to_consumer_driving_duration: Math.round(drivingMin * 60),
+        use_llm_explanation: false
+      };
+    }
+
+    function updateInputLabels() {
+      const hour = document.getElementById("inpHour").value;
+      const onshift = parseFloat(document.getElementById("inpOnshift").value);
+      const busy = parseFloat(document.getElementById("inpBusy").value);
+      const outstanding = document.getElementById("inpOutstanding").value;
+      const items = document.getElementById("inpItems").value;
+      const subtotalCents = parseFloat(document.getElementById("inpSubtotal").value);
+      const drivingMin = parseFloat(document.getElementById("inpDrivingMin").value);
+      const placeMin = parseFloat(document.getElementById("inpPlaceMin").value);
+
+      document.getElementById("lblHour").textContent = hour + "h";
+      document.getElementById("lblOnshift").textContent = onshift;
+      document.getElementById("lblBusy").textContent = busy;
+      document.getElementById("lblOutstanding").textContent = outstanding;
+      document.getElementById("lblItems").textContent = items;
+      document.getElementById("lblSubtotal").textContent = "US$ " + (subtotalCents / 100).toFixed(2).replace(".", ",");
+      document.getElementById("lblDrivingMin").textContent = drivingMin.toFixed(1).replace(".", ",") + " min (" + Math.round(drivingMin * 60) + " s)";
+      document.getElementById("lblPlaceMin").textContent = placeMin.toFixed(1).replace(".", ",") + " min (" + Math.round(placeMin * 60) + " s)";
+
+      const ratioPct = Math.round((busy / Math.max(1, onshift)) * 100);
+      const badge = document.getElementById("lblOccupancyBadge");
+      badge.textContent = "Ocupação: " + ratioPct + "%";
+      if (ratioPct >= 95) {
+        badge.className = "text-xs font-bold px-2 py-0.5 rounded-md bg-red-100 text-red-800";
+      } else if (ratioPct >= 75) {
+        badge.className = "text-xs font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800";
+      } else {
+        badge.className = "text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800";
+      }
+    }
+
+    function renderPredictionResult(res) {
+      const riskPctNum = res.delay_risk_score * 100;
+      const riskPctStr = riskPctNum.toFixed(1).replace(".", ",") + "%";
+
+      document.getElementById("kpiRiskPct").textContent = riskPctStr;
+      document.getElementById("kpiPredictedMin").textContent = res.predicted_duration_min.toFixed(1).replace(".", ",");
+      document.getElementById("kpiReferenceMin").textContent = res.reference_eta_min.toFixed(1).replace(".", ",");
+
+      const excess = res.expected_delay_excess_min;
+      const excessEl = document.getElementById("kpiExcessMin");
+      const excessSub = document.getElementById("kpiExcessSub");
+      if (excess > 0) {
+        excessEl.textContent = "+" + excess.toFixed(1).replace(".", ",");
+        excessEl.className = "text-2xl sm:text-3xl font-extrabold text-red-600";
+        excessSub.textContent = "Acima do prazo de referência";
+      } else {
+        excessEl.textContent = excess.toFixed(1).replace(".", ",");
+        excessEl.className = "text-2xl sm:text-3xl font-extrabold text-emerald-600";
+        excessSub.textContent = excess < 0 ? "Abaixo do prazo de referência" : "Igual ao prazo de referência";
+      }
+
+      const banner = document.getElementById("riskBanner");
+      const pill = document.getElementById("riskBadgePill");
+      const headline = document.getElementById("riskHeadline");
+      const bar = document.getElementById("riskProgressBar");
+      bar.style.width = riskPctNum + "%";
+
+      if (res.is_high_risk) {
+        banner.className = "rounded-2xl p-5 border shadow-sm transition-all bg-red-50 border-red-200";
+        pill.className = "text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-red-600 text-white";
+        pill.textContent = "Alto Risco de Atraso";
+        headline.textContent = "A previsão indica maior chance de ultrapassar a referência";
+        bar.className = "h-full transition-all duration-300 rounded-full bg-red-600";
+      } else if (riskPctNum >= 25) {
+        banner.className = "rounded-2xl p-5 border shadow-sm transition-all bg-amber-50 border-amber-200";
+        pill.className = "text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500 text-white";
+        pill.textContent = "Risco Moderado";
+        headline.textContent = "Confira a estimativa e o prazo de referência";
+        bar.className = "h-full transition-all duration-300 rounded-full bg-amber-500";
+      } else {
+        banner.className = "rounded-2xl p-5 border shadow-sm transition-all bg-emerald-50 border-emerald-200";
+        pill.className = "text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-600 text-white";
+        pill.textContent = "Baixo risco";
+        headline.textContent = "A previsão indica menor chance de ultrapassar a referência";
+        bar.className = "h-full transition-all duration-300 rounded-full bg-emerald-600";
+      }
+
+      document.getElementById("lblBaseIntercept").textContent = res.model_base_duration_min.toFixed(1).replace(".", ",") + " min";
+
+      // Renderizar barras dos fatores de influência
+      const container = document.getElementById("factorsContainer");
+      container.innerHTML = "";
+      const maxAbs = Math.max(1.0, ...res.top_influencing_factors.map(f => Math.abs(f.impact_minutes)));
+
+      for (const f of res.top_influencing_factors) {
+        const isPos = f.impact_minutes >= 0;
+        const pctWidth = Math.min(100, Math.max(6, Math.round((Math.abs(f.impact_minutes) / maxAbs) * 100)));
+        const sign = isPos ? "+" : "";
+        const badgeColor = isPos
+          ? "bg-red-50 text-red-700 border-red-200"
+          : "bg-emerald-50 text-emerald-700 border-emerald-200";
+        const barColor = isPos ? "bg-red-500" : "bg-emerald-500";
+
+        const row = document.createElement("div");
+        row.className = "p-3 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5";
+        row.innerHTML = `
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <div class="font-semibold text-slate-800"></div>
+            <span class="font-bold px-2 py-0.5 rounded-md border ${badgeColor}">
+              ${sign}${f.impact_minutes.toFixed(2).replace(".", ",")} min
+            </span>
+          </div>
+          <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div class="h-full ${barColor} rounded-full" style="width: ${pctWidth}%"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-500">
+            <span>Variável: <code></code></span>
+            <span>Valor processado: <strong>${f.raw_value}</strong></span>
+          </div>
+        `;
+        row.querySelector(".font-semibold").textContent = f.description_pt;
+        row.querySelector("code").textContent = f.feature;
+        container.appendChild(row);
+      }
+
+      document.getElementById("txtExplanation").textContent = res.explanation_text;
+      document.getElementById("lblExplanationMode").textContent = res.explanation_mode;
+      document.getElementById("jsonPre").textContent = JSON.stringify(res, null, 2);
+    }
+
+    async function runPrediction() {
+      updateInputLabels();
+      currentRequest?.abort();
+      const request = new AbortController();
+      currentRequest = request;
+      const badge = document.getElementById("engineBadge");
+      const results = document.getElementById("predictionResults");
+      results.classList.add("hidden");
+      badge.textContent = "Calculando previsão…";
+
+      try {
+        const response = await fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(readFormPayload()),
+          signal: request.signal
+        });
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+        const data = await response.json();
+        if (request.signal.aborted) return;
+        const sourceLabels = {
+          real_doordash_csv: "Modelo treinado com a amostra histórica DoorDash"
+        };
+        badge.textContent = data.model_data_source.startsWith("synthetic_ci_fixture")
+          ? "Modelo treinado com dados sintéticos de teste"
+          : sourceLabels[data.model_data_source] ?? data.model_data_source;
+        renderPredictionResult(data);
+        results.classList.remove("hidden");
+      } catch (_error) {
+        if (!request.signal.aborted) {
+          badge.textContent = "Previsão indisponível. Confira se a API está em execução.";
+        }
+      }
+    }
+
+    function applyScenario(preset) {
+      document.getElementById("inpCategory").value = preset.category;
+      document.getElementById("inpMarket").value = String(preset.market);
+      document.getElementById("inpHour").value = String(preset.hour);
+      document.getElementById("inpWeekend").value = String(preset.weekend);
+      document.getElementById("inpOnshift").value = String(preset.onshift);
+      document.getElementById("inpBusy").value = String(preset.busy);
+      document.getElementById("inpOutstanding").value = String(preset.outstanding);
+      document.getElementById("inpItems").value = String(preset.items);
+      document.getElementById("inpSubtotal").value = String(preset.subtotal);
+      document.getElementById("inpDrivingMin").value = String(preset.drivingMin);
+      document.getElementById("inpPlaceMin").value = String(preset.placeMin);
+      runPrediction();
+    }
+
+    // Listeners de controles
+    const inputIds = [
+      "inpCategory", "inpMarket", "inpHour", "inpWeekend",
+      "inpOnshift", "inpBusy", "inpOutstanding",
+      "inpItems", "inpSubtotal", "inpDrivingMin", "inpPlaceMin"
+    ];
+    for (const id of inputIds) {
+      document.getElementById(id).addEventListener("input", runPrediction);
+    }
+
+    document.getElementById("btnRecalculate").addEventListener("click", runPrediction);
+
+    document.getElementById("btnScenarioLow").addEventListener("click", () => {
+      applyScenario({
+        category: "sandwiches", market: 1, hour: 15, weekend: 0,
+        onshift: 45, busy: 18, outstanding: 16,
+        items: 1, subtotal: 1150, drivingMin: 7.0, placeMin: 4.0
+      });
+    });
+
+    document.getElementById("btnScenarioMed").addEventListener("click", () => {
+      applyScenario({
+        category: "american", market: 2, hour: 12, weekend: 0,
+        onshift: 30, busy: 26, outstanding: 33,
+        items: 3, subtotal: 2800, drivingMin: 13.5, placeMin: 4.5
+      });
+    });
+
+    document.getElementById("btnScenarioHigh").addEventListener("click", () => {
+      applyScenario({
+        category: "pizza", market: 2, hour: 20, weekend: 1,
+        onshift: 16, busy: 18, outstanding: 42,
+        items: 7, subtotal: 6400, drivingMin: 19.0, placeMin: 7.5
+      });
+    });
+
+    document.getElementById("btnToggleJson").addEventListener("click", () => {
+      const panel = document.getElementById("jsonPanel");
+      const btn = document.getElementById("btnToggleJson");
+      if (panel.classList.contains("hidden")) {
+        panel.classList.remove("hidden");
+        btn.textContent = "Ocultar JSON da API";
+      } else {
+        panel.classList.add("hidden");
+        btn.textContent = "Ver JSON da API";
+      }
+    });
+
+    document.getElementById("btnCopyJson").addEventListener("click", () => {
+      const text = document.getElementById("jsonPre").textContent;
+      const btn = document.getElementById("btnCopyJson");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "Copiado!";
+          setTimeout(() => { btn.textContent = "Copiar JSON"; }, 1500);
+        }).catch(() => {});
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", runPrediction);
+  </script>
+</body>
+</html>
