@@ -1,0 +1,291 @@
+{
+  "data_source_label": "real_doordash_csv",
+  "warning_pt": "Avaliação histórica na amostra DoorDash de 2015 com ruído na origem.",
+  "audit_cleaning": {
+    "initial_rows": 197428,
+    "dropped_missing_timestamps": 7,
+    "final_rows": 197280,
+    "dropped_nonpositive_duration": 0,
+    "dropped_outside_5_to_180_min": 141
+  },
+  "temporal_split": {
+    "train_rows": 137635,
+    "val_rows": 29411,
+    "test_rows": 29592,
+    "train_excluded_pending_at_validation_cut": 461,
+    "validation_excluded_pending_at_test_cut": 181,
+    "validation_cut_utc": "2015-02-10 04:33:25+00:00",
+    "test_cut_utc": "2015-02-14 18:28:14+00:00",
+    "train_period": "2015-01-21 15:22:03+00:00 -> 2015-02-10 04:10:49+00:00",
+    "validation_period": "2015-02-10 04:33:25+00:00 -> 2015-02-14 17:58:53+00:00",
+    "test_period": "2015-02-14 18:28:14+00:00 -> 2015-02-18 06:00:44+00:00"
+  },
+  "configuration": {
+    "ridge_alpha": 25.0,
+    "reference_margin_min": 5.0,
+    "primary_duration_range_min": [
+      5.0,
+      180.0
+    ],
+    "risk_method": "empirical_validation_residuals"
+  },
+  "test_metrics_median_baseline": {
+    "MAE_min": 13.85,
+    "RMSE_min": 19.238,
+    "MedAE_min": 10.483,
+    "P90_Abs_Error_min": 28.983,
+    "R2": -0.0702,
+    "Delay_Rate_Actual": 0.4099,
+    "ROC_AUC": 0.5,
+    "Average_Precision": 0.4099,
+    "Brier_Score": 0.2432,
+    "Mean_Predicted_Risk": 0.3734,
+    "Precision": 0.0,
+    "Recall": 0.0,
+    "F1_Score": 0.0
+  },
+  "test_metrics_baseline": {
+    "MAE_min": 13.226,
+    "RMSE_min": 18.586,
+    "MedAE_min": 9.909,
+    "P90_Abs_Error_min": 27.857,
+    "R2": 0.0011,
+    "Delay_Rate_Actual": 0.4099,
+    "ROC_AUC": 0.5,
+    "Average_Precision": 0.4099,
+    "Brier_Score": 0.2432,
+    "Mean_Predicted_Risk": 0.3734,
+    "Precision": 0.0,
+    "Recall": 0.0,
+    "F1_Score": 0.0
+  },
+  "test_metrics_ridge_model": {
+    "MAE_min": 11.616,
+    "RMSE_min": 15.919,
+    "MedAE_min": 9.201,
+    "P90_Abs_Error_min": 22.808,
+    "R2": 0.2672,
+    "Delay_Rate_Actual": 0.4099,
+    "ROC_AUC": 0.7445,
+    "Average_Precision": 0.6758,
+    "Brier_Score": 0.1986,
+    "Mean_Predicted_Risk": 0.4245,
+    "Precision": 0.6821,
+    "Recall": 0.5103,
+    "F1_Score": 0.5839
+  },
+  "test_metrics_ridge_normal_risk": {
+    "MAE_min": 11.616,
+    "RMSE_min": 15.919,
+    "MedAE_min": 9.201,
+    "P90_Abs_Error_min": 22.808,
+    "R2": 0.2672,
+    "Delay_Rate_Actual": 0.4099,
+    "ROC_AUC": 0.7445,
+    "Average_Precision": 0.6758,
+    "Brier_Score": 0.2041,
+    "Mean_Predicted_Risk": 0.4789,
+    "Precision": 0.6228,
+    "Recall": 0.6351,
+    "F1_Score": 0.6289
+  },
+  "test_risk_calibration": [
+    {
+      "from": 0.0,
+      "to": 0.2,
+      "rows": 3698,
+      "mean_predicted": 0.1584,
+      "observed_rate": 0.1552
+    },
+    {
+      "from": 0.2,
+      "to": 0.4,
+      "rows": 12491,
+      "mean_predicted": 0.2992,
+      "observed_rate": 0.2742
+    },
+    {
+      "from": 0.4,
+      "to": 0.6,
+      "rows": 7284,
+      "mean_predicted": 0.4869,
+      "observed_rate": 0.4942
+    },
+    {
+      "from": 0.6,
+      "to": 0.8,
+      "rows": 3820,
+      "mean_predicted": 0.6929,
+      "observed_rate": 0.6942
+    },
+    {
+      "from": 0.8,
+      "to": 1.0,
+      "rows": 2299,
+      "mean_predicted": 0.889,
+      "observed_rate": 0.8177
+    }
+  ],
+  "test_all_positive_durations": {
+    "rows": 29611,
+    "median_baseline": {
+      "MAE_min": 14.206,
+      "RMSE_min": 38.309,
+      "MedAE_min": 10.483,
+      "P90_Abs_Error_min": 29.067,
+      "R2": -0.0194,
+      "Delay_Rate_Actual": 0.4103,
+      "ROC_AUC": 0.5,
+      "Average_Precision": 0.4103,
+      "Brier_Score": 0.2433,
+      "Mean_Predicted_Risk": 0.3734,
+      "Precision": 0.0,
+      "Recall": 0.0,
+      "F1_Score": 0.0
+    },
+    "operational_baseline": {
+      "MAE_min": 13.58,
+      "RMSE_min": 37.956,
+      "MedAE_min": 9.917,
+      "P90_Abs_Error_min": 27.939,
+      "R2": -0.0007,
+      "Delay_Rate_Actual": 0.4103,
+      "ROC_AUC": 0.5,
+      "Average_Precision": 0.4103,
+      "Brier_Score": 0.2433,
+      "Mean_Predicted_Risk": 0.3734,
+      "Precision": 0.0,
+      "Recall": 0.0,
+      "F1_Score": 0.0
+    },
+    "ridge": {
+      "MAE_min": 11.967,
+      "RMSE_min": 36.608,
+      "MedAE_min": 9.206,
+      "P90_Abs_Error_min": 22.847,
+      "R2": 0.0691,
+      "Delay_Rate_Actual": 0.4103,
+      "ROC_AUC": 0.7444,
+      "Average_Precision": 0.6761,
+      "Brier_Score": 0.1987,
+      "Mean_Predicted_Risk": 0.4245,
+      "Precision": 0.6824,
+      "Recall": 0.5103,
+      "F1_Score": 0.5839
+    },
+    "ridge_normal_risk": {
+      "MAE_min": 11.967,
+      "RMSE_min": 36.608,
+      "MedAE_min": 9.206,
+      "P90_Abs_Error_min": 22.847,
+      "R2": 0.0691,
+      "Delay_Rate_Actual": 0.4103,
+      "ROC_AUC": 0.7444,
+      "Average_Precision": 0.676,
+      "Brier_Score": 0.2042,
+      "Mean_Predicted_Risk": 0.4789,
+      "Precision": 0.6231,
+      "Recall": 0.635,
+      "F1_Score": 0.629
+    },
+    "risk_calibration": [
+      {
+        "from": 0.0,
+        "to": 0.2,
+        "rows": 3701,
+        "mean_predicted": 0.1584,
+        "observed_rate": 0.1559
+      },
+      {
+        "from": 0.2,
+        "to": 0.4,
+        "rows": 12497,
+        "mean_predicted": 0.2993,
+        "observed_rate": 0.2745
+      },
+      {
+        "from": 0.4,
+        "to": 0.6,
+        "rows": 7287,
+        "mean_predicted": 0.4869,
+        "observed_rate": 0.4944
+      },
+      {
+        "from": 0.6,
+        "to": 0.8,
+        "rows": 3826,
+        "mean_predicted": 0.693,
+        "observed_rate": 0.6947
+      },
+      {
+        "from": 0.8,
+        "to": 1.0,
+        "rows": 2300,
+        "mean_predicted": 0.889,
+        "observed_rate": 0.8178
+      }
+    ]
+  },
+  "top_global_features": [
+    {
+      "feature": "total_outstanding_orders",
+      "description_pt": "Total de pedidos em andamento num raio de 10 milhas",
+      "weight_minutes_per_std": 13.514,
+      "abs_importance_min": 13.514
+    },
+    {
+      "feature": "total_onshift_dashers",
+      "description_pt": "Total de entregadores ativos no turno",
+      "weight_minutes_per_std": -11.499,
+      "abs_importance_min": 11.499
+    },
+    {
+      "feature": "hour_cos",
+      "description_pt": "Componente cíclico de horário (cosseno)",
+      "weight_minutes_per_std": -3.208,
+      "abs_importance_min": 3.208
+    },
+    {
+      "feature": "orders_per_onshift_dasher",
+      "description_pt": "Pressão de demanda (pedidos ativos por entregador no turno)",
+      "weight_minutes_per_std": 3.009,
+      "abs_importance_min": 3.009
+    },
+    {
+      "feature": "subtotal_dollars",
+      "description_pt": "Valor subtotal do pedido (US$)",
+      "weight_minutes_per_std": 2.582,
+      "abs_importance_min": 2.582
+    },
+    {
+      "feature": "estimated_non_prep_min",
+      "description_pt": "Soma das estimativas de rota e transmissão",
+      "weight_minutes_per_std": 2.375,
+      "abs_importance_min": 2.375
+    },
+    {
+      "feature": "is_peak_dinner",
+      "description_pt": "Horário de pico do jantar (18h às 21h)",
+      "weight_minutes_per_std": 2.237,
+      "abs_importance_min": 2.237
+    },
+    {
+      "feature": "estimated_driving_min",
+      "description_pt": "Tempo estimado de trânsito (loja -> cliente)",
+      "weight_minutes_per_std": 2.134,
+      "abs_importance_min": 2.134
+    },
+    {
+      "feature": "protocol_4",
+      "description_pt": "protocol_4",
+      "weight_minutes_per_std": 1.916,
+      "abs_importance_min": 1.916
+    },
+    {
+      "feature": "total_busy_dashers",
+      "description_pt": "Total de entregadores ocupados na região",
+      "weight_minutes_per_std": -1.774,
+      "abs_importance_min": 1.774
+    }
+  ]
+}

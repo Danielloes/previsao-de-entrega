@@ -1,0 +1,10 @@
+numpy==2.5.4
+pandas==3.1.1
+scipy==1.18.1
+fastapi==0.162.0
+pydantic==2.14.2
+uvicorn==0.54.0
+starlette==1.10.0
+httpx==0.28.1
+anyio==4.16.0
+tzdata==2026.6
